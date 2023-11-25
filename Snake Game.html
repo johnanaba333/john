@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Snake Game</title>
+    <style>
+        #game-board {
+            width: 400px;
+            height: 400px;
+            border: 1px solid black;
+            position: relative;
+            background-color: aqua;
+        }
+
+        .snake {
+            width: 10px;
+            height: 10px;
+            background-color: green;
+            position: absolute;
+        }
+
+        .food {
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <h1>Snake Game</h1>
+    <div id="game-board"></div>
+
+    <script>
+        // Game Variables
+        var gameBoard = document.getElementById("game-board");
+        var snake = [{ x: 10, y: 10 }];
+        var food = { x: 5, y: 5 };
+        var direction = { x: 0, y: 0 };
+        var score = 0;
+        var speed = 200;
+        var intervalId;
+
+        // Game Initialization
+        function init() {
+            createSnake();
+            createFood();
+            intervalId = setInterval(moveSnake, speed);
+            document.addEventListener("keydown", changeDirection);
+        }
+
+        // Create Snake
+        function createSnake() {
+            snake.forEach(function (segment) {
+                var snakeElement = document.createElement("div");
+                snakeElement.style.left = segment.x * 20 + "px";
+                snakeElement.style.top = segment.y * 20 + "px";
+                snakeElement.classList.add("snake");
+                gameBoard.appendChild(snakeElement);
+            });
+        }
+
+        // Create Food
+        function createFood() {
+            var foodElement = document.createElement("div");
+            foodElement.style.left = food.x * 20 + "px";
+            foodElement.style.top = food.y * 20 + "px";
+            foodElement.classList.add("food");
+            gameBoard.appendChild(foodElement);
+        }
+
+        // Remove Snake
+        function removeSnake() {
+            var snakeElements = document.getElementsByClassName("snake");
+            while (snakeElements.length > 0) {
+                snakeElements[0].parentNode.removeChild(snakeElements[0]);
+            }
+        }
+
+        // Remove Food
+        function removeFood() {
+            var foodElements = document.getElementsByClassName("food");
+            while (foodElements.length > 0) {
+                foodElements[0].parentNode.removeChild(foodElements[0]);
+            }
+        }
+
+        // Move Snake
+        function moveSnake() {
+            var head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                speed -= 10;
+                clearInterval(intervalId);
+                intervalId = setInterval(moveSnake, speed);
+                removeFood();
+                createFood();
+            } else {
+                snake.pop();
+            }
+            removeSnake();
+            createSnake();
+            checkCollision();
+        }
+
+        // Change Direction
+        function changeDirection(event) {
+            if (event.keyCode === 37 && direction.x !== 1) {
+                direction = { x: -1, y: 0 };
+            } else if (event.keyCode === 38 && direction.y !== 1) {
+                direction = { x: 0, y: -1 };
+            } else if (event.keyCode === 39 && direction.x !== -1) {
+                direction = { x: 1, y: 0 };
+            } else if (event.keyCode === 40 && direction.y !== -1) {
+                direction = { x: 0, y: 1 };
+            }
+        }
+
+        // Check Collision
+        function checkCollision() {
+            var head = snake[0];
+            if (head.x < 0 || head.x >= 20 || head.y < 0 || head.y >= 20) {
+                gameOver();
+            }
+            for (var i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                }
+            }
+        }
+
+        // Game Over
+        function gameOver() {
+            clearInterval(intervalId);
+            alert("Game Over! Score: " + score);
+        }
+
+        // Start the Game
+        init();
+    </script>
+</body>
+</html>
+
